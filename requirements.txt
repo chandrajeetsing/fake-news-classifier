@@ -1,0 +1,14 @@
+# Base requirements for the project
+
+pandas
+scikit-learn
+python-box
+pyyaml
+Flask
+nltk
+python-box
+ensure
+# For development and notebooks
+
+notebook
+ipykernel

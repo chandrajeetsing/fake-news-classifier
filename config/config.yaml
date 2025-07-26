@@ -1,0 +1,22 @@
+# This file defines the directory structure for artifacts and data.
+# It helps in managing paths centrally.
+
+artifacts_root: artifacts
+
+# Data Ingestion related paths
+data_ingestion:
+  root_dir: artifacts/data_ingestion
+  source_data_path: data/raw
+  local_data_file: artifacts/data_ingestion/data.csv
+
+# Data Transformation related paths
+data_transformation:
+  root_dir: artifacts/data_transformation
+  transformed_data_path: artifacts/data_transformation/train.csv
+  test_data_path: artifacts/data_transformation/test.csv
+
+# Model Trainer related paths
+model_trainer:
+  root_dir: artifacts/model_trainer
+  trained_model_file_path: artifacts/model_trainer/model.pkl
+  vectorizer_file_path: artifacts/model_trainer/tfidf_vectorizer.pkl

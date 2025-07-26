@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fake News Classifier</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Fake News Classifier</h1>
+            <p>Enter a news article below to determine if it is REAL or FAKE.</p>
+        </header>
+        
+        <form action="/predict" method="post">
+            <textarea name="text" rows="15" placeholder="Paste your news article text here..." required></textarea>
+            <button type="submit">Classify News</button>
+        </form>
+
+        {% if prediction %}
+        <div class="result-container">
+            <h2>Prediction Result:</h2>
+            <p class="prediction-text 
+                {% if 'FAKE' in prediction %}fake-news{% else %}real-news{% endif %}">
+                {{ prediction }}
+            </p>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

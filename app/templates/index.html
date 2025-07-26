@@ -3,28 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fake News Classifier</title>
+    <title>Live News Topic Classifier</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>Fake News Classifier</h1>
-            <p>Enter a news article below to determine if it is REAL or FAKE.</p>
+            <h1>Live News Topic Classifier</h1>
+            <p>Latest headlines scraped from BBC News Technology, classified in real-time.</p>
         </header>
-        
-        <form action="/predict" method="post">
-            <textarea name="text" rows="15" placeholder="Paste your news article text here..." required></textarea>
-            <button type="submit">Classify News</button>
-        </form>
 
-        {% if prediction %}
-        <div class="result-container">
-            <h2>Prediction Result:</h2>
-            <p class="prediction-text 
-                {% if 'FAKE' in prediction %}fake-news{% else %}real-news{% endif %}">
-                {{ prediction }}
-            </p>
+        {% if error %}
+            <div class="error-box">
+                <p>{{ error }}</p>
+            </div>
+        {% endif %}
+
+        {% if summary %}
+        <div class="summary-section">
+            <h2>Today's Topics</h2>
+            <div class="summary-grid">
+                {% for topic, count in summary.items() %}
+                <div class="topic-card">
+                    <span class="topic-name">{{ topic }}</span>
+                    <span class="topic-count">{{ count }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if articles %}
+        <div class="articles-section">
+            <h2>Latest Headlines</h2>
+            <ul class="article-list">
+                {% for article in articles %}
+                <li class="article-item">
+                    <span class="category-tag category-{{ article.category.lower() }}">{{ article.category }}</span>
+                    <p class="headline-text">{{ article.headline }}</p>
+                </li>
+                {% endfor %}
+            </ul>
         </div>
         {% endif %}
     </div>

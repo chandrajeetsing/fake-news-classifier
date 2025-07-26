@@ -10,5 +10,14 @@ python-box
 ensure
 # For development and notebooks
 
+
+
+
 notebook
 ipykernel
+
+# Web Scraping libraries
+
+requests
+beautifulsoup4
+lxml

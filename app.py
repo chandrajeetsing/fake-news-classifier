@@ -1,41 +1,48 @@
-from flask import Flask, render_template, request
-import os
+from flask import Flask, render_template
+from collections import Counter
 from fakeNewsClassifier.pipeline.prediction_pipeline import PredictionPipeline
+from fakeNewsClassifier.components.web_scraper import WebScraper
+from fakeNewsClassifier.logging import logger
 
 # Initialize the Flask application
 app = Flask(__name__, template_folder='app/templates', static_folder='app/static')
 
-# Route for the home page
 @app.route('/', methods=['GET'])
 def home():
-    """Renders the home page."""
-    return render_template('index.html')
-
-# Route for handling the prediction
-@app.route('/predict', methods=['POST'])
-def predict():
     """
-    Receives text from the form, uses the prediction pipeline to get a result,
-    and renders the result on the index page.
+    Scrapes the latest news, classifies each headline, and displays a summary.
     """
     try:
-        # Get the text from the form
-        text = request.form['text']
+        logger.info("Request received for home page.")
         
-        # Initialize the prediction pipeline
+        # 1. Scrape latest headlines
+        scraper = WebScraper()
+        headlines_data = scraper.get_latest_headlines(limit=20)
+        
+        if not headlines_data:
+            return render_template('index.html', error="Could not scrape any headlines. The website layout may have changed.")
+
+        # 2. Classify each headline
         prediction_pipeline = PredictionPipeline()
+        classified_articles = []
+        all_categories = []
+
+        for item in headlines_data:
+            headline = item['headline']
+            predicted_category = prediction_pipeline.predict(headline)
+            classified_articles.append({'headline': headline, 'category': predicted_category})
+            all_categories.append(predicted_category)
         
-        # Get the prediction
-        result = prediction_pipeline.predict(text)
+        # 3. Summarize the topics
+        topic_summary = Counter(all_categories)
         
-        # Render the page with the prediction result
-        return render_template('index.html', prediction=str(result))
+        logger.info(f"Topic summary: {topic_summary}")
+
+        return render_template('index.html', articles=classified_articles, summary=topic_summary)
 
     except Exception as e:
-        # In case of an error, render the page with an error message
-        return render_template('index.html', prediction=f"Error: {e}")
+        logger.error(f"An error occurred on the home page: {e}")
+        return render_template('index.html', error=f"An unexpected error occurred: {e}")
 
-# This block allows the app to be run directly
 if __name__ == "__main__":
-    # Use 0.0.0.0 to make it accessible on your local network
-    app.run(host="0.0.0.0", port=8080, debug=True)
+    app.run(host="0.0.0.0", port=8080)

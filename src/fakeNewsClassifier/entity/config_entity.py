@@ -28,10 +28,12 @@ class DataTransformationConfig:
         root_dir (Path): The root directory for transformation artifacts.
         transformed_data_path (Path): Path to save the training data.
         test_data_path (Path): Path to save the testing data.
+        label_encoder_path (Path): Path to save the label encoder object.
     """
     root_dir: Path
     transformed_data_path: Path
     test_data_path: Path
+    label_encoder_path: Path # Added the new path here
 
 
 @dataclass(frozen=True)

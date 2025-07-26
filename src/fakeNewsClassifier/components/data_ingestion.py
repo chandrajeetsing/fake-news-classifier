@@ -2,15 +2,15 @@ import os
 import pandas as pd
 from fakeNewsClassifier.logging import logger
 from fakeNewsClassifier.entity.config_entity import DataIngestionConfig
+from pathlib import Path
 
 class DataIngestion:
     """
-    Handles the ingestion of data from source files.
+    Handles the ingestion of data from the BBC News dataset structure.
     
-    This component reads the raw 'True.csv' and 'Fake.csv' files,
-    adds a 'label' column to distinguish between them, combines them
-    into a single DataFrame, shuffles the data, and saves it to a
-    specified location for further processing.
+    This component reads text files from category-named subdirectories,
+    assigns the category as a label, combines them into a single DataFrame,
+    and saves it to a specified location for further processing.
     """
     def __init__(self, config: DataIngestionConfig):
         """
@@ -24,44 +24,50 @@ class DataIngestion:
 
     def ingest_data(self):
         """
-        Executes the data ingestion process.
+        Executes the data ingestion process for the BBC dataset.
         """
-        logger.info("Starting data ingestion process.")
+        logger.info("Starting data ingestion process for BBC dataset.")
         
         try:
-            # Define paths to the raw data files
-            true_data_path = os.path.join(self.config.source_data_path, 'True.csv')
-            fake_data_path = os.path.join(self.config.source_data_path, 'Fake.csv')
-
-            # Read the datasets
-            logger.info(f"Reading real news data from: {true_data_path}")
-            df_true = pd.read_csv(true_data_path)
+            # The root directory of the BBC dataset
+            bbc_data_path = Path(self.config.source_data_path) / 'bbc'
             
-            logger.info(f"Reading fake news data from: {fake_data_path}")
-            df_fake = pd.read_csv(fake_data_path)
+            if not bbc_data_path.exists():
+                logger.error(f"Source data directory not found at: {bbc_data_path}")
+                raise FileNotFoundError(f"Source data directory not found at: {bbc_data_path}")
 
-            # Add label column: 0 for real, 1 for fake
-            df_true['label'] = 0
-            df_fake['label'] = 1
+            all_articles = []
+            categories = [d for d in bbc_data_path.iterdir() if d.is_dir()]
             
-            logger.info("Added 'label' column to both dataframes.")
+            logger.info(f"Found categories: {[cat.name for cat in categories]}")
 
-            # Combine the dataframes
-            df_combined = pd.concat([df_true, df_fake], ignore_index=True)
-            logger.info("Combined real and fake news dataframes.")
+            for category_path in categories:
+                category_name = category_path.name
+                logger.info(f"Processing category: {category_name}")
+                for text_file in category_path.glob('*.txt'):
+                    try:
+                        with open(text_file, 'r', encoding='utf-8', errors='ignore') as f:
+                            text_content = f.read()
+                            all_articles.append({
+                                'text': text_content,
+                                'category': category_name
+                            })
+                    except Exception as e:
+                        logger.warning(f"Could not read file {text_file}: {e}")
 
-            # Shuffle the dataset to mix the data
-            df_shuffled = df_combined.sample(frac=1, random_state=42).reset_index(drop=True)
+            # Convert the list of dictionaries to a DataFrame
+            df = pd.DataFrame(all_articles)
+            logger.info(f"Successfully read {len(df)} articles.")
+            
+            # Shuffle the dataset
+            df_shuffled = df.sample(frac=1, random_state=42).reset_index(drop=True)
             logger.info("Shuffled the combined dataset.")
 
-            # Save the combined and shuffled data
+            # Save the combined data
             output_path = self.config.local_data_file
             df_shuffled.to_csv(output_path, index=False)
             logger.info(f"Data ingestion successful. Saved combined data to: {output_path}")
 
-        except FileNotFoundError as e:
-            logger.error(f"Error: One of the source files was not found. Please check the path in config.yaml. Details: {e}")
-            raise e
         except Exception as e:
             logger.error(f"An unexpected error occurred during data ingestion: {e}")
             raise e

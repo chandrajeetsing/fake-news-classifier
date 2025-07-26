@@ -14,6 +14,7 @@ data_transformation:
   root_dir: artifacts/data_transformation
   transformed_data_path: artifacts/data_transformation/train.csv
   test_data_path: artifacts/data_transformation/test.csv
+  label_encoder_path: artifacts/data_transformation/label_encoder.pkl # New path for the encoder
 
 # Model Trainer related paths
 model_trainer:

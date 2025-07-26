@@ -56,7 +56,8 @@ class ConfigurationManager:
         data_transformation_config = DataTransformationConfig(
             root_dir=Path(config.root_dir),
             transformed_data_path=Path(config.transformed_data_path),
-            test_data_path=Path(config.test_data_path)
+            test_data_path=Path(config.test_data_path),
+            label_encoder_path=Path(config.label_encoder_path)
         )
 
         return data_transformation_config

@@ -6,10 +6,12 @@ from fakeNewsClassifier.logging import logger
 
 class TrainPipeline:
     """
-    Orchestrates the entire model training workflow.
+    Orchestrates the entire model training workflow for the BBC News dataset.
     
-    This pipeline sequentially runs all the necessary components for training,
-    starting from data ingestion.
+    This pipeline sequentially runs all the necessary components for training:
+    1. Data Ingestion
+    2. Data Transformation
+    3. Model Training
     """
     def __init__(self):
         """
@@ -22,23 +24,21 @@ class TrainPipeline:
         The main entry point to run the training pipeline.
         """
         try:
-            logger.info("Starting the training pipeline.")
+            logger.info("Starting the full training pipeline for BBC News dataset.")
             
-            # # --- Data Ingestion Step ---
-            # logger.info("Executing Data Ingestion component.")
-            # data_ingestion_config = self.config_manager.get_data_ingestion_config()
-            # data_ingestion = DataIngestion(config=data_ingestion_config)
-            # data_ingestion.ingest_data()
-            # logger.info("Data Ingestion component finished successfully.")
+            # --- Data Ingestion Step ---
+            logger.info("Executing Data Ingestion component.")
+            data_ingestion_config = self.config_manager.get_data_ingestion_config()
+            data_ingestion = DataIngestion(config=data_ingestion_config)
+            data_ingestion.ingest_data()
+            logger.info("Data Ingestion component finished successfully.")
 
-
-            # # --- Data Transformation Step ---
-            # logger.info("Executing Data Transformation component.")
+            # --- Data Transformation Step ---
+            logger.info("Executing Data Transformation component.")
             data_transformation_config = self.config_manager.get_data_transformation_config()
-            # data_transformation = DataTransformation(config=data_transformation_config)
-            # # Pass the path of the ingested data to the transformation component
-            # data_transformation.transform_data(data_path=data_ingestion_config.local_data_file)
-            # logger.info("Data Transformation component finished successfully.")
+            data_transformation = DataTransformation(config=data_transformation_config)
+            data_transformation.transform_data(data_path=data_ingestion_config.local_data_file)
+            logger.info("Data Transformation component finished successfully.")
 
             # --- Model Training Step ---
             logger.info("Executing Model Trainer component.")
@@ -50,9 +50,7 @@ class TrainPipeline:
             )
             logger.info("Model Trainer component finished successfully.")
 
-            
-
-            logger.info("Training pipeline finished successfully.")
+            logger.info(">>> Full training pipeline finished successfully. <<<")
 
         except Exception as e:
             logger.error(f"Training pipeline failed with error: {e}")

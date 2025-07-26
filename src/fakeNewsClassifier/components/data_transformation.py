@@ -1,9 +1,11 @@
 import pandas as pd
 import re
 import nltk
+import joblib
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
 from fakeNewsClassifier.logging import logger
 from fakeNewsClassifier.entity.config_entity import DataTransformationConfig
 
@@ -11,7 +13,7 @@ class DataTransformation:
     """
     Transforms the raw text data into a format suitable for model training.
     
-    This includes cleaning the text (removing stopwords, punctuation, etc.) and
+    This includes cleaning the text, encoding the categorical labels, and
     splitting the data into training and testing sets.
     """
     def __init__(self, config: DataTransformationConfig):
@@ -22,11 +24,10 @@ class DataTransformation:
             config (DataTransformationConfig): Configuration for data transformation.
         """
         self.config = config
-        # Download NLTK resources if not already present
         self._download_nltk_resources()
 
     def _download_nltk_resources(self):
-        """Downloads necessary NLTK data files."""
+        """Downloads necessary NLTK data files if they don't exist."""
         try:
             nltk.data.find('corpora/stopwords')
         except LookupError:
@@ -52,12 +53,9 @@ class DataTransformation:
             return ""
         
         lemmatizer = WordNetLemmatizer()
-        # Remove non-alphabetic characters
         review = re.sub('[^a-zA-Z]', ' ', text)
         review = review.lower()
         review = review.split()
-        
-        # Lemmatize and remove stopwords
         review = [lemmatizer.lemmatize(word) for word in review if not word in stopwords.words('english')]
         return ' '.join(review)
 
@@ -68,32 +66,36 @@ class DataTransformation:
         Args:
             data_path (str): Path to the input data CSV file.
         """
-        logger.info("Starting data transformation process.")
+        logger.info("Starting data transformation process for BBC data.")
         try:
             df = pd.read_csv(data_path)
             
-            # Drop rows with missing values in 'text' or 'title'
-            df.dropna(subset=['text', 'title'], inplace=True)
-            logger.info("Dropped rows with missing text or title.")
+            df.dropna(subset=['text', 'category'], inplace=True)
+            logger.info("Dropped rows with missing text or category.")
             
-            # Combine title and text for a richer feature set
-            df['content'] = df['title'] + ' ' + df['text']
-            logger.info("Combined 'title' and 'text' into 'content' column.")
-
-            # Apply preprocessing
-            logger.info("Applying text preprocessing to the 'content' column...")
-            df['content'] = df['content'].apply(self._preprocess_text)
+            # Apply text preprocessing
+            logger.info("Applying text preprocessing to the 'text' column...")
+            df['text'] = df['text'].apply(self._preprocess_text)
             logger.info("Text preprocessing complete.")
 
+            # Encode the 'category' column
+            encoder = LabelEncoder()
+            df['category_encoded'] = encoder.fit_transform(df['category'])
+            logger.info("Applied Label Encoding to the 'category' column.")
+            
+            # Save the fitted LabelEncoder
+            joblib.dump(encoder, self.config.label_encoder_path)
+            logger.info(f"Saved LabelEncoder to: {self.config.label_encoder_path}")
+
             # Splitting the data
-            X = df['content']
-            y = df['label']
+            X = df['text']
+            y = df['category_encoded']
             X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
             logger.info("Split data into training and testing sets.")
 
             # Save the transformed data
-            train_df = pd.DataFrame({'content': X_train, 'label': y_train})
-            test_df = pd.DataFrame({'content': X_test, 'label': y_test})
+            train_df = pd.DataFrame({'text': X_train, 'label': y_train})
+            test_df = pd.DataFrame({'text': X_test, 'label': y_test})
 
             train_df.to_csv(self.config.transformed_data_path, index=False)
             test_df.to_csv(self.config.test_data_path, index=False)

@@ -16,6 +16,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # This includes the 'src' directory, 'app.py', 'artifacts', etc.
 COPY . .
 
+RUN pip install -e .
+
 # Make port 8080 available to the world outside this container
 # This is the port our Flask app will run on
 EXPOSE 8080

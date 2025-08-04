@@ -18,6 +18,7 @@ class TrainPipeline:
         Initializes the training pipeline.
         """
         self.config_manager = ConfigurationManager()
+        
 
     def main(self):
         """
@@ -46,7 +47,8 @@ class TrainPipeline:
             model_trainer = ModelTrainer(config=model_trainer_config)
             model_trainer.train(
                 train_data_path=data_transformation_config.transformed_data_path,
-                test_data_path=data_transformation_config.test_data_path
+                test_data_path=data_transformation_config.test_data_path,
+                data_transformation_config=data_transformation_config
             )
             logger.info("Model Trainer component finished successfully.")
 

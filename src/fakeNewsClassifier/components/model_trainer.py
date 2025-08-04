@@ -2,8 +2,9 @@ import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 import joblib
+from pathlib import Path
 from fakeNewsClassifier.logging import logger
-from fakeNewsClassifier.entity.config_entity import ModelTrainerConfig
+from fakeNewsClassifier.entity.config_entity import ModelTrainerConfig, DataTransformationConfig
 
 class ModelTrainer:
     """
@@ -22,7 +23,7 @@ class ModelTrainer:
         """
         self.config = config
 
-    def train(self, train_data_path: str, test_data_path: str):
+    def train(self, train_data_path: str, test_data_path: str, data_transformation_config: DataTransformationConfig):
         """
         Executes the model training process.
 
@@ -70,6 +71,16 @@ class ModelTrainer:
             logger.info(f"Saved TF-IDF vectorizer to: {self.config.vectorizer_file_path}")
             
             logger.info("Model training process finished successfully.")
+
+
+            # --- Copy the Label Encoder ---
+            # Load the encoder from the data transformation artifacts
+            encoder_to_copy = joblib.load(data_transformation_config.label_encoder_path)
+            # Define the destination path within the model_trainer artifacts directory
+            final_encoder_path = Path(self.config.root_dir) / "label_encoder.pkl"
+            # Save a copy to the model_trainer directory
+            joblib.dump(encoder_to_copy, final_encoder_path)
+            logger.info(f"Copied label encoder to: {final_encoder_path}")
 
         except Exception as e:
             logger.error(f"An error occurred during model training: {e}")

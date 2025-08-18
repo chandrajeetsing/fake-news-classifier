@@ -1,0 +1,10 @@
+# requirements.txt
+requests
+PyYAML
+python-dotenv
+langchain
+langchain-google-genai  # <-- ADD THIS LINE
+openai
+Flask
+apscheduler
+# ... and others

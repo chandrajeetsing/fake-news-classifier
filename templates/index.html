@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI News Agent</title>
+    <style>
+        body { font-family: sans-serif; line-height: 1.6; margin: 2em; background-color: #f4f4f4; color: #333; }
+        .container { max-width: 800px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        .article { border-bottom: 1px solid #ddd; padding-bottom: 20px; margin-bottom: 20px; }
+        .article:last-child { border-bottom: none; }
+        h1 { color: #2c3e50; }
+        h2 { color: #34495e; }
+        .tags { margin-top: 10px; }
+        .tag { background-color: #ecf0f1; color: #7f8c8d; padding: 5px 10px; border-radius: 5px; font-size: 0.9em; margin-right: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AI-Generated News Feed</h1>
+
+        {% for article in articles %}
+            <div class="article">
+                <h2>{{ article.seo_title }}</h2>
+                <p>{{ article.summary }}</p>
+                <div class="tags">
+                    <strong>Category:</strong> <span class="tag">{{ article.category }}</span>
+                    <strong>Region:</strong> <span class="tag">{{ article.region }}</span>
+                </div>
+            </div>
+        {% else %}
+            <p>No articles found. Please run the agent first by running <strong>python main.py</strong></p>
+        {% endfor %}
+    </div>
+</body>
+</html>

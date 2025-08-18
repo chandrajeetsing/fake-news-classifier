@@ -1,0 +1,17 @@
+# params.yaml
+artifacts_root: artifacts
+
+data_ingestion:
+  root_dir: artifacts/data_ingestion
+  news_api_key: 78b87de897a140d1a5819b2513d8acd1 # Best to load this from .env in your code
+  topics:
+      - '"Uttar Pradesh" AND (Lucknow OR Noida OR Varanasi OR crime OR politics OR election)'
+    
+  source_file_name: "raw_data.json"
+
+content_processing:
+  root_dir: artifacts/content_processing
+  # openai_api_key: YOUR_OPENAI_API_KEY # Load from .env
+  processed_file_name: "processed_data.json"
+  model_name: "gemini-1.5-flash"
+  google_api_key: "AIzaSyCo5E937gQ94wwm6LWlk6_IpYIJfn1JcM8"
